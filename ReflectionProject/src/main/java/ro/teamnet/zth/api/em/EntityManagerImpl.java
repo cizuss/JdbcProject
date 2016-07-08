@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -100,5 +101,45 @@ public class EntityManagerImpl {
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
         }
+    }
+
+
+    @Override
+    public <T> List<T> findAll(Class<T> entityTest) {
+        Connection connection= DBManager.getConnection();
+        String tableName=EntityUtils.getTableName(entityTest);
+        List<ColumnInfo> columns=EntityUtils.getColumns(entityTest);
+
+        QueryBuilder query=new QueryBuilder().setTableName(tableName);
+        query.addQueryColumns(columns);
+        query.setQueryType(QueryType.SELECT);
+
+        String sqlQuery=query.createQuery();
+
+        try {
+            Statement stm=connection.createStatement();
+            ResultSet resultSet=stm.executeQuery(sqlQuery);
+            ArrayList<T> list=new ArrayList<T>();
+
+            while(resultSet.next()){
+                T instance=entityTest.newInstance();
+                for(ColumnInfo cInfo:columns){
+                    Field field=instance.getClass().getDeclaredField(cInfo.getColumnName());
+                    field.setAccessible(true);
+                    field.set(instance,EntityUtils.castFromSqlType(resultSet.getObject(cInfo.getDbName()),cInfo.getColumnType()));
+                }
+                list.add(instance);
+            }
+            return list;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
