@@ -24,24 +24,23 @@ public class EntityUtils {
     }
 
     public static List<ColumnInfo> getColumns(Class entity) {
+        List<ColumnInfo> columns = new ArrayList<>();
         Field[] fields = entity.getDeclaredFields();
-        List<ColumnInfo> columnInfoList = new ArrayList<ColumnInfo>();
-        for (Field field : fields) {
-            Column annotation = (Column)field.getAnnotation(Column.class);
-            ColumnInfo cinfo = new ColumnInfo();
-            if (annotation != null) {
-                cinfo.setId(false);
-                cinfo.setDbName(annotation.name());
+        for(Field field : fields) {
+            Column column = field.getAnnotation(Column.class);
+            ColumnInfo columnInfo = new ColumnInfo();
+            columnInfo.setColumnName(field.getName());
+            columnInfo.setColumnType(field.getType());
+            if(column != null) {
+                columnInfo.setDbName(column.name());
+            } else {
+                Id id = field.getAnnotation(Id.class);
+                columnInfo.setDbName(id.name());
+                columnInfo.setId(true);
             }
-            else {
-                cinfo.setId(true);
-                cinfo.setDbName("Id");
-            }
-            cinfo.setColumnName(field.getName());
-            cinfo.setColumnType(field.getType());
-            columnInfoList.add(cinfo);
+            columns.add(columnInfo);
         }
-        return columnInfoList;
+        return columns;
     }
 
     public static Object castFromSqlType(Object value, Class wantedType) {
@@ -58,14 +57,14 @@ public class EntityUtils {
     }
 
     public static List<Field> getFieldsByAnnotations(Class clazz, Class annotation) {
-        Field[] fields = clazz.getDeclaredFields();
-        List<Field> fieldList = new ArrayList<Field>();
-        for (Field field : fields) {
-            Annotation fieldAnnotation = field.getAnnotation(annotation);
-            if (fieldAnnotation != null)
-                fieldList.add(field);
+        List<Field> fields = new ArrayList<>();
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for(Field declaredField : declaredFields) {
+            if(declaredField.getAnnotation(annotation) != null) {
+                fields.add(declaredField);
+            }
         }
-        return fieldList;
+        return fields;
     }
 
     public static Object getSqlValue(Object object) {

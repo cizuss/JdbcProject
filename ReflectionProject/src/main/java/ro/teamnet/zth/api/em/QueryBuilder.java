@@ -59,8 +59,8 @@ public class QueryBuilder {
         StringBuilder sb = new StringBuilder();
         sb.append("select ");
         for (int i=0; i<queryColumns.size()-1; i++)
-            sb.append(queryColumns.get(i).getColumnName() + ", ");
-        sb.append(queryColumns.get(queryColumns.size()-1).getColumnName());
+            sb.append(queryColumns.get(i).getDbName() + ", ");
+        sb.append(queryColumns.get(queryColumns.size()-1).getDbName());
         sb.append(" from " + tableName);
         if (conditions.size() == 0) {
             //sb.append(";");
@@ -91,9 +91,9 @@ public class QueryBuilder {
         StringBuilder sb = new StringBuilder();
         sb.append("update table " + this.tableName + " set ");
         for (int i=0; i<queryColumns.size()-1; i++) {
-            sb.append(queryColumns.get(i).getColumnName() + "=" + queryColumns.get(i).getValue() + " and ");
+            sb.append(queryColumns.get(i).getDbName() + "=" + queryColumns.get(i).getValue() + " and ");
         }
-        sb.append(queryColumns.get(queryColumns.size()-1).getColumnName() + "=" + getValueForQuery(queryColumns.get(queryColumns.size()-1).getValue()));
+        sb.append(queryColumns.get(queryColumns.size()-1).getDbName() + "=" + getValueForQuery(queryColumns.get(queryColumns.size()-1).getValue()));
         if (conditions.size() == 0) {
             //sb.append(";");
             return sb;

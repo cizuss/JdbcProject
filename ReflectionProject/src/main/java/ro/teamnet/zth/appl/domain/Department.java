@@ -12,7 +12,7 @@ public class Department  {
     @Column(name = "department_name")
     private String departmentName;
     @Column(name = "location_id")
-    private Location location;
+    private Integer location;
 
     public Long getId() {
         return id;
@@ -30,11 +30,11 @@ public class Department  {
         this.departmentName = departmentName;
     }
 
-    public Location getLocation() {
+    public int getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(int location) {
         this.location = location;
     }
 
@@ -61,6 +61,10 @@ public class Department  {
 
     @Override
     public String toString() {
-        return super.toString();
+        return "Department{" +
+                "id=" + id +
+                ", departmentName='" + departmentName + '\'' +
+                ", location=" + location +
+                '}';
     }
 }
