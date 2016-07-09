@@ -57,4 +57,48 @@ public class EntityManagerImpl {
         }
         return instance;
     }
+
+    public <T> Object insert(T entity){
+        String tableName = EntityUtils.getTableName(entity.getClass());
+        List<ColumnInfo> cList = EntityUtils.getColumns(entity.getClass());
+        QueryBuilder qb = new QueryBuilder();
+        qb.setTableName(tableName);
+        qb.addQueryColumns(cList);
+        qb.setQueryType(QueryType.INSERT);
+        T instance = null;
+        for (ColumnInfo columnInfo : cList) {
+            if (columnInfo.isId())
+                columnInfo.setValue(getNextIdVal(tableName,columnInfo.getDbName()));
+            else {
+                try {
+                    Field field = entity.getClass().getDeclaredField(columnInfo.getColumnName());
+                    field.setAccessible(true);
+                    columnInfo.setValue(field.get(entity));
+                } catch (NoSuchFieldException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        String queryString = qb.createQuery();
+        try (Connection connection=DBManager.getConnection(); Statement stmt = connection.createStatement()) {
+            ResultSet resultSet = stmt.executeQuery(queryString);
+            instance = (T) entity.getClass().newInstance();
+            for (ColumnInfo cinfo : cList) {
+                Field field = instance.getClass().getDeclaredField(cinfo.getColumnName());
+                field.setAccessible(true);
+                field.set(instance, EntityUtils.castFromSqlType(resultSet.getObject(cinfo.getDbName()), cinfo.getColumnType()));
+            }
+            return instance;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+    }
 }
