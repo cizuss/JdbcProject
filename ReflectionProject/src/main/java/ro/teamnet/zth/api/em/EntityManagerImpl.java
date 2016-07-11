@@ -41,7 +41,6 @@ public class EntityManagerImpl {
                     Field field = instance.getClass().getDeclaredField(cinfo.getColumnName());
                     field.setAccessible(true);
                     String columnName = cinfo.getDbName();
-                    System.out.println("column name is " + cinfo.getColumnName());
                     field.set(instance, EntityUtils.castFromSqlType(result.getObject(columnName), cinfo.getColumnType()));
                 }
             }
@@ -66,10 +65,12 @@ public class EntityManagerImpl {
         qb.setTableName(tableName);
         qb.addQueryColumns(cList);
         qb.setQueryType(QueryType.INSERT);
-        T instance = null;
+        long nextId = 1;
         for (ColumnInfo columnInfo : cList) {
-            if (columnInfo.isId())
-                columnInfo.setValue(getNextIdVal(tableName,columnInfo.getDbName()));
+            if (columnInfo.isId()) {
+                nextId =  getNextIdVal(tableName, columnInfo.getDbName());
+                columnInfo.setValue(nextId);
+            }
             else {
                 try {
                     Field field = entity.getClass().getDeclaredField(columnInfo.getColumnName());
@@ -83,28 +84,16 @@ public class EntityManagerImpl {
             }
         }
         String queryString = qb.createQuery();
+        System.out.println(queryString);
         try (Connection connection=DBManager.getConnection(); Statement stmt = connection.createStatement()) {
-            ResultSet resultSet = stmt.executeQuery(queryString);
-            instance = (T) entity.getClass().newInstance();
-            for (ColumnInfo cinfo : cList) {
-                Field field = instance.getClass().getDeclaredField(cinfo.getColumnName());
-                field.setAccessible(true);
-                field.set(instance, EntityUtils.castFromSqlType(resultSet.getObject(cinfo.getDbName()), cinfo.getColumnType()));
-            }
-            return instance;
+            stmt.execute(queryString);
+            return findById(entity.getClass(), nextId);
         } catch (SQLException e) {
             e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
         }
+        return null;
     }
 
-
-    @Override
     public <T> List<T> findAll(Class<T> entityTest) {
         Connection connection= DBManager.getConnection();
         String tableName=EntityUtils.getTableName(entityTest);
@@ -141,5 +130,17 @@ public class EntityManagerImpl {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public Long getNextIdVal(String tableName, String columnIdName) {
+        try (Connection conn = DBManager.getConnection(); Statement stmt = conn.createStatement()) {
+            ResultSet resultSet = stmt.executeQuery("select max(" + columnIdName + ") from " + tableName);
+            if (resultSet.next()) {
+                return resultSet.getLong(1) + 1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return (long)1;
     }
 }
