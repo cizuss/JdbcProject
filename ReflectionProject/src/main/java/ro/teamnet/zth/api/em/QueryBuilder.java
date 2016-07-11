@@ -89,9 +89,9 @@ public class QueryBuilder {
 
     private StringBuilder createUpdateQuery() {
         StringBuilder sb = new StringBuilder();
-        sb.append("update table " + this.tableName + " set ");
+        sb.append("update " + this.tableName + " set ");
         for (int i=0; i<queryColumns.size()-1; i++) {
-            sb.append(queryColumns.get(i).getDbName() + "=" + queryColumns.get(i).getValue() + " and ");
+            sb.append(queryColumns.get(i).getDbName() + "=" + getValueForQuery(queryColumns.get(i).getValue()) + ", ");
         }
         sb.append(queryColumns.get(queryColumns.size()-1).getDbName() + "=" + getValueForQuery(queryColumns.get(queryColumns.size()-1).getValue()));
         if (conditions.size() == 0) {
@@ -109,8 +109,8 @@ public class QueryBuilder {
         StringBuilder sb = new StringBuilder();
         sb.append("insert into " + this.tableName + " values (");
         for (int i=0; i<queryColumns.size()-1; i++)
-            sb.append(queryColumns.get(i).getValue() + ",");
-        sb.append(queryColumns.get(queryColumns.size()-1).getValue() + ")");
+            sb.append(getValueForQuery(queryColumns.get(i).getValue()) + ",");
+        sb.append(getValueForQuery(queryColumns.get(queryColumns.size()-1).getValue()) + ")");
         return sb;
     }
 

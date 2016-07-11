@@ -34,7 +34,7 @@ public class Employee {
     private Date hireDate;
 
     @Column(name = "JOB_ID")
-    private Integer jobId;
+    private String jobId;
 
     @Column(name = "SALARY")
     private BigDecimal salary;
@@ -96,11 +96,11 @@ public class Employee {
         this.hireDate = hireDate;
     }
 
-    public Integer getJobId() {
+    public String getJobId() {
         return jobId;
     }
 
-    public void setJobId(Integer jobId) {
+    public void setJobId(String jobId) {
         this.jobId = jobId;
     }
 
@@ -195,5 +195,22 @@ public class Employee {
         result = 31 * result + (managerId != null ? managerId.hashCode() : 0);
         result = 31 * result + (departmentId != null ? departmentId.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", hireDate=" + hireDate +
+                ", jobId='" + jobId + '\'' +
+                ", salary=" + salary +
+                ", commissionPct=" + commissionPct +
+                ", managerId=" + managerId +
+                ", departmentId=" + departmentId +
+                '}';
     }
 }

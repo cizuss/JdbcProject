@@ -5,7 +5,9 @@ import ro.teamnet.zth.api.annotations.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -44,16 +46,20 @@ public class EntityUtils {
     }
 
     public static Object castFromSqlType(Object value, Class wantedType) {
-        if (value instanceof BigDecimal) {
-            if (wantedType.getSimpleName().equals("Integer"))
-                return ((BigDecimal)value).intValue();
-            if (wantedType.getSimpleName().equals("Long"))
-                return ((BigDecimal)value).longValue();
-            if (wantedType.getSimpleName().equals("Float"))
-                return ((BigDecimal)value).floatValue();
-            return ((BigDecimal)value).doubleValue();
+        if(value != null) {
+            if (value instanceof java.sql.Timestamp)
+                return new java.sql.Date(((java.sql.Timestamp)value).getTime());
+            if(value instanceof BigDecimal) {
+                BigDecimal bdValue = (BigDecimal) value;
+                return wantedType.equals(Integer.class) ? bdValue.intValue() :
+                        wantedType.equals(Long.class) ? bdValue.longValue() :
+                                wantedType.equals(Float.class) ? bdValue.floatValue() :
+                                        wantedType.equals(Double.class) ? bdValue.doubleValue() : value;
+            } else {
+                return value;
+            }
         }
-        return value;
+        return null;
     }
 
     public static List<Field> getFieldsByAnnotations(Class clazz, Class annotation) {

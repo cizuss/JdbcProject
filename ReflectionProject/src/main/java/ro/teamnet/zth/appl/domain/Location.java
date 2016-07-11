@@ -18,6 +18,18 @@ public class Location {
     @Column(name = "state_province")
     private String stateProvince;
 
+    public Location() {
+
+    }
+
+    public Location(Long id, String streetAddress, String postalCode, String city, String stateProvince) {
+        this.id = id;
+        this.streetAddress = streetAddress;
+        this.postalCode = postalCode;
+        this.city = city;
+        this.stateProvince = stateProvince;
+    }
+
     public long getId() {
         return id;
     }
